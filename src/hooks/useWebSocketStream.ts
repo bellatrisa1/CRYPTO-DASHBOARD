@@ -15,6 +15,7 @@ export function useWebSocketStream({
   const setStreamStatus = useMarketStore((state) => state.setStreamStatus);
   const setReconnectMeta = useMarketStore((state) => state.setReconnectMeta);
   const resetReconnectMeta = useMarketStore((state) => state.resetReconnectMeta);
+  const setLatency = useMarketStore((state) => state.setLatency);
 
   useEffect(() => {
     if (!enabled) return;
@@ -29,13 +30,18 @@ export function useWebSocketStream({
         resetReconnectMeta();
       },
       onMessage: (raw) => {
+        const startedAt = performance.now();
         routeIncomingMessage(raw);
+        const endedAt = performance.now();
+        setLatency(Math.round(endedAt - startedAt));
       },
       onClose: () => {
         setStreamStatus('closed');
+        setLatency(null);
       },
       onError: () => {
         setStreamStatus('error');
+        setLatency(null);
       },
       onReconnectScheduled: (attempt, delayMs) => {
         setStreamStatus('reconnecting');
@@ -50,6 +56,14 @@ export function useWebSocketStream({
       client.disconnect();
       setStreamStatus('closed');
       resetReconnectMeta();
+      setLatency(null);
     };
-  }, [enabled, url, setStreamStatus, setReconnectMeta, resetReconnectMeta]);
+  }, [
+    enabled,
+    url,
+    setStreamStatus,
+    setReconnectMeta,
+    resetReconnectMeta,
+    setLatency,
+  ]);
 }

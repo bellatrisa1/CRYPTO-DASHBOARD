@@ -1,3 +1,5 @@
+// src/components/ui/Widget.tsx
+
 import type { PropsWithChildren, ReactNode } from 'react';
 
 type WidgetProps = PropsWithChildren<{

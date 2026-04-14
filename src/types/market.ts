@@ -1,3 +1,5 @@
+// src/types/market.ts
+
 export type TradingPair = 'BTCUSDT' | 'ETHUSDT' | 'SOLUSDT';
 
 export type PricePoint = {

@@ -1,3 +1,5 @@
+// src/utils/mockOrderBook.ts
+
 import type { OrderBookLevel, OrderBookSnapshot } from '../types/orderBook';
 
 function randomInRange(min: number, max: number) {

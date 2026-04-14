@@ -1,3 +1,5 @@
+// src/utils/mockMarket.ts
+
 import type { PricePoint, TradingPair } from '../types/market';
 
 function randomInRange(min: number, max: number) {

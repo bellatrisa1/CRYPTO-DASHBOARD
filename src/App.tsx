@@ -1,26 +1,44 @@
 import './App.scss';
+import { MiniChart } from './components/chart/MiniChart';
 import { PriceChart } from './components/chart/PriceChart';
 import { OrderBook } from './components/order-book/OrderBook';
 import { TradesList } from './components/trades/TradesList';
 import { MarketOverview } from './components/ui/MarketOverview';
 import { PairSelector } from './components/ui/PairSelector';
+import { RegionalActivity } from './components/ui/RegionalActivity';
 import { Widget } from './components/ui/Widget';
+import { useMarketSnapshot } from './hooks/useMarketSnapshot';
+import { useMockMarketStream } from './hooks/useMockMarketStream';
 import { useWebSocketStream } from './hooks/useWebSocketStream';
+import { buildRealtimeUrl, getRealtimeSource } from './services/streams';
 import { useMarketStore } from './store/marketStore';
 
 function App() {
   const symbol = useMarketStore((state) => state.symbol);
-
-  useWebSocketStream({
-    enabled: true,
-    url: `wss://stream.binance.com:9443/stream?streams=${symbol.toLowerCase()}@aggTrade/${symbol.toLowerCase()}@depth20@100ms`,
-  });
-
   const points = useMarketStore((state) => state.points);
   const isConnected = useMarketStore((state) => state.isConnected);
   const streamStatus = useMarketStore((state) => state.streamStatus);
   const reconnectAttempt = useMarketStore((state) => state.reconnectAttempt);
   const nextReconnectInMs = useMarketStore((state) => state.nextReconnectInMs);
+  const telemetry = useMarketStore((state) => state.telemetry);
+  const latencyMs = useMarketStore((state) => state.latencyMs);
+
+  const realtimeSource = getRealtimeSource();
+  const realtimeUrl = buildRealtimeUrl(symbol);
+
+  useMarketSnapshot({
+    symbol,
+    enabled: true,
+  });
+
+  useWebSocketStream({
+    enabled: realtimeSource !== 'mock' && Boolean(realtimeUrl),
+    url: realtimeUrl ?? '',
+  });
+
+  useMockMarketStream({
+    enabled: realtimeSource === 'mock',
+  });
 
   return (
     <div className="dashboard-page">
@@ -43,6 +61,12 @@ function App() {
               <span>{isConnected ? 'Stream connected' : 'Stream offline'}</span>
               <span className="stream-badge">{streamStatus}</span>
 
+              {latencyMs !== null ? (
+                <span className="stream-badge stream-badge--latency">
+                  {latencyMs} ms
+                </span>
+              ) : null}
+
               {streamStatus === 'reconnecting' && nextReconnectInMs !== null ? (
                 <span className="stream-badge stream-badge--warning">
                   retry #{reconnectAttempt} in{' '}
@@ -63,23 +87,19 @@ function App() {
               title={`${symbol.replace('USDT', '/USDT')} Price Chart`}
               subtitle="Live market overview"
             >
-              <PriceChart data={points} />
+              <PriceChart data={points} streamStatus={streamStatus} />
             </Widget>
           </section>
 
           <section className="dashboard-grid__server-load">
-            <Widget title="Server Load" subtitle="Last 30 minutes">
-              <div className="chart-placeholder">
-                <span>Mini chart</span>
-              </div>
+            <Widget title="Server Load" subtitle="Last 30 updates">
+              <MiniChart data={telemetry.serverLoadSeries} color="#f3bc58" />
             </Widget>
           </section>
 
           <section className="dashboard-grid__network">
             <Widget title="Network Traffic" subtitle="Realtime throughput">
-              <div className="chart-placeholder">
-                <span>Traffic chart</span>
-              </div>
+              <MiniChart data={telemetry.networkSeries} color="#37e27d" />
             </Widget>
           </section>
 
@@ -103,35 +123,28 @@ function App() {
               title="Trading Volume"
               subtitle="Aggregated market activity"
             >
-              <div className="chart-placeholder">
-                <span>Volume widget</span>
-              </div>
+              <MiniChart data={telemetry.volumeSeries} color="#4fa3ff" />
             </Widget>
           </section>
 
           <section className="dashboard-grid__activity">
             <Widget title="User Activity" subtitle="Regional events">
-              <div className="map-placeholder">
-                <span>World activity map</span>
-              </div>
+              <RegionalActivity />
             </Widget>
           </section>
 
           <section className="dashboard-grid__metrics">
             <Widget title="Server Metrics" subtitle="System health">
               <div className="gauge-list">
-                <div className="gauge-card">
-                  <div className="gauge-ring">59%</div>
-                  <span>Memory</span>
-                </div>
-                <div className="gauge-card">
-                  <div className="gauge-ring">72%</div>
-                  <span>CPU</span>
-                </div>
-                <div className="gauge-card">
-                  <div className="gauge-ring">48%</div>
-                  <span>Network</span>
-                </div>
+                {telemetry.metrics.map((metric) => (
+                  <div key={metric.label} className="gauge-card">
+                    <div className="gauge-ring">
+                      {metric.value}
+                      {metric.unit}
+                    </div>
+                    <span>{metric.label}</span>
+                  </div>
+                ))}
               </div>
             </Widget>
           </section>

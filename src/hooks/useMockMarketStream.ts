@@ -3,14 +3,22 @@ import { routeIncomingMessage } from '../services/wsRouter';
 import { useMarketStore } from '../store/marketStore';
 import { generateMockOrderBook } from '../utils/mockOrderBook';
 
+type UseMockMarketStreamOptions = {
+  enabled?: boolean;
+};
+
 function randomInRange(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-export function useMockMarketStream() {
+export function useMockMarketStream({
+  enabled = false,
+}: UseMockMarketStreamOptions) {
   const setStreamStatus = useMarketStore((state) => state.setStreamStatus);
 
   useEffect(() => {
+    if (!enabled) return;
+
     setStreamStatus('open');
 
     const interval = window.setInterval(() => {
@@ -18,7 +26,6 @@ export function useMockMarketStream() {
       const currentPoints = currentState.points;
       const lastPoint = currentPoints[currentPoints.length - 1];
       const lastPrice = lastPoint?.price ?? 84200;
-      const updateMiniCharts = currentState.updateMiniCharts;
 
       const drift = randomInRange(-120, 160);
       const nextPrice = Math.max(1, lastPrice + drift);
@@ -53,12 +60,12 @@ export function useMockMarketStream() {
       routeIncomingMessage(marketTickMessage);
       routeIncomingMessage(tradeMessage);
       routeIncomingMessage(orderBookMessage);
-      updateMiniCharts();
+      useMarketStore.getState().updateTelemetry();
     }, 500);
 
     return () => {
       window.clearInterval(interval);
       setStreamStatus('closed');
     };
-  }, [setStreamStatus]);
+  }, [enabled, setStreamStatus]);
 }

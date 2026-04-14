@@ -1,12 +1,13 @@
 import type { ChangeEvent } from 'react';
 import type { TradingPair } from '../../types/market';
+import { SUPPORTED_PAIRS } from '../../config/market';
 import { useMarketStore } from '../../store/marketStore';
 
-const pairOptions: Array<{ value: TradingPair; label: string }> = [
-  { value: 'BTCUSDT', label: 'BTC / USDT' },
-  { value: 'ETHUSDT', label: 'ETH / USDT' },
-  { value: 'SOLUSDT', label: 'SOL / USDT' },
-];
+const pairOptions: Array<{ value: TradingPair; label: string }> =
+  SUPPORTED_PAIRS.map((pair) => ({
+    value: pair,
+    label: pair.replace('USDT', ' / USDT'),
+  }));
 
 export function PairSelector() {
   const symbol = useMarketStore((state) => state.symbol);

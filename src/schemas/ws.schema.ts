@@ -1,3 +1,5 @@
+// src/schemas/ws.schema.ts
+
 import { z } from 'zod';
 
 /* =========================
@@ -98,3 +100,60 @@ export type BinancePartialDepthMessage = z.infer<
 export type BinanceCombinedStreamMessage = z.infer<
   typeof binanceCombinedStreamSchema
 >;
+
+export const backendMarketTickSchema = z.object({
+  type: z.literal('market.tick'),
+  payload: z.object({
+    symbol: z.string(),
+    timestamp: z.number(),
+    price: z.number(),
+    volume: z.number(),
+  }),
+});
+
+export const backendTradeSchema = z.object({
+  type: z.literal('market.trade'),
+  payload: z.object({
+    id: z.string(),
+    symbol: z.string(),
+    timestamp: z.number(),
+    price: z.number(),
+    amount: z.number(),
+    side: z.enum(['buy', 'sell']),
+  }),
+});
+
+export const backendOrderBookSchema = z.object({
+  type: z.literal('market.orderbook'),
+  payload: z.object({
+    symbol: z.string(),
+    bids: z.array(z.tuple([z.number(), z.number()])),
+    asks: z.array(z.tuple([z.number(), z.number()])),
+  }),
+});
+
+export const backendTelemetrySchema = z.object({
+  type: z.literal('telemetry.snapshot'),
+  payload: z.object({
+    metrics: z.array(
+      z.object({
+        label: z.string(),
+        value: z.number(),
+        unit: z.enum(['%', 'MB/s', 'req/s']),
+      })
+    ),
+    activity: z.array(
+      z.object({
+        region: z.string(),
+        value: z.number(),
+      })
+    ),
+  }),
+});
+
+export const backendIncomingSchema = z.discriminatedUnion('type', [
+  backendMarketTickSchema,
+  backendTradeSchema,
+  backendOrderBookSchema,
+  backendTelemetrySchema,
+]);

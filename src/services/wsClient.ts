@@ -1,3 +1,5 @@
+// src/services/wsClient.ts
+
 import type { StreamStatus } from '../types/ws';
 
 type WsClientOptions = {

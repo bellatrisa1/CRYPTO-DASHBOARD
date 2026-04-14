@@ -1,3 +1,5 @@
+// src/types/orderBook.ts
+
 export type OrderBookSide = 'bid' | 'ask';
 
 export type OrderBookLevel = {

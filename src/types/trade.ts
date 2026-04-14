@@ -1,3 +1,5 @@
+// src/types/trade.ts
+
 export type TradeSide = 'buy' | 'sell';
 
 export type Trade = {

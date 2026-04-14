@@ -2,10 +2,21 @@ import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import type { PricePoint } from '../../types/market';
+import type { StreamStatus } from '../../types/ws';
+import { WidgetState } from '../ui/WidgetState';
 
 type PriceChartProps = {
   data: PricePoint[];
-  title?: string;
+  streamStatus?: StreamStatus;
+};
+
+type CandleItem = {
+  time: string;
+  open: number;
+  close: number;
+  low: number;
+  high: number;
+  volume: number;
 };
 
 function formatTime(timestamp: number) {
@@ -15,109 +26,230 @@ function formatTime(timestamp: number) {
   });
 }
 
-export function PriceChart({ data }: PriceChartProps) {
+function buildCandles(points: PricePoint[]): CandleItem[] {
+  if (points.length === 0) return [];
+
+  return points.map((point, index) => {
+    const prev = points[index - 1];
+    const next = points[index + 1];
+
+    const open = prev?.price ?? point.price;
+    const close = point.price;
+
+    const localLow = Math.min(
+      open,
+      close,
+      prev?.price ?? close,
+      next?.price ?? close
+    );
+
+    const localHigh = Math.max(
+      open,
+      close,
+      prev?.price ?? close,
+      next?.price ?? close
+    );
+
+    const extraSpread = Math.max(point.price * 0.0015, 8);
+
+    const low = Number((localLow - extraSpread * 0.25).toFixed(2));
+    const high = Number((localHigh + extraSpread * 0.25).toFixed(2));
+
+    return {
+      time: formatTime(point.timestamp),
+      open: Number(open.toFixed(2)),
+      close: Number(close.toFixed(2)),
+      low,
+      high,
+      volume: Number(point.volume.toFixed(2)),
+    };
+  });
+}
+
+export function PriceChart({ data, streamStatus = 'idle' }: PriceChartProps) {
+  const candles = useMemo(() => buildCandles(data), [data]);
+
   const option = useMemo<EChartsOption>(() => {
+    const categoryData = candles.map((item) => item.time);
+    const candlestickData = candles.map((item) => [
+      item.open,
+      item.close,
+      item.low,
+      item.high,
+    ]);
+    const volumeData = candles.map((item) => item.volume);
+
     return {
       animation: true,
       backgroundColor: 'transparent',
-      grid: {
-        top: 20,
-        right: 20,
-        bottom: 32,
-        left: 20,
-        containLabel: true,
+      legend: {
+        show: false,
       },
       tooltip: {
         trigger: 'axis',
+        axisPointer: {
+          type: 'cross',
+        },
         backgroundColor: '#0d1727',
         borderColor: 'rgba(123, 168, 255, 0.24)',
         textStyle: {
           color: '#e9f1ff',
         },
-        formatter: (params: unknown) => {
-          const items = params as Array<{
-            axisValue: string;
-            data: number;
-          }>;
-
-          if (!items.length) return '';
-
-          const first = items[0];
-
-          return `
-            <div style="min-width: 120px;">
-              <div style="margin-bottom: 6px; color: #8da3c7;">${first.axisValue}</div>
-              <div><strong>Price:</strong> $${first.data.toLocaleString()}</div>
-            </div>
-          `;
+      },
+      axisPointer: {
+        link: [{ xAxisIndex: 'all' }],
+        label: {
+          backgroundColor: '#1b2a41',
         },
       },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.map((item) => formatTime(item.timestamp)),
-        axisLine: {
-          lineStyle: {
-            color: 'rgba(141, 163, 199, 0.2)',
+      grid: [
+        {
+          left: 18,
+          right: 18,
+          top: 18,
+          height: '66%',
+        },
+        {
+          left: 18,
+          right: 18,
+          top: '78%',
+          height: '14%',
+        },
+      ],
+      xAxis: [
+        {
+          type: 'category',
+          data: categoryData,
+          boundaryGap: true,
+          axisLine: {
+            lineStyle: {
+              color: 'rgba(141, 163, 199, 0.2)',
+            },
+          },
+          axisLabel: {
+            color: '#8da3c7',
+            fontSize: 11,
+          },
+          splitLine: {
+            show: false,
+          },
+          min: 'dataMin',
+          max: 'dataMax',
+        },
+        {
+          type: 'category',
+          gridIndex: 1,
+          data: categoryData,
+          boundaryGap: true,
+          axisLine: {
+            lineStyle: {
+              color: 'rgba(141, 163, 199, 0.2)',
+            },
+          },
+          axisLabel: {
+            show: false,
+          },
+          axisTick: {
+            show: false,
+          },
+          splitLine: {
+            show: false,
+          },
+          min: 'dataMin',
+          max: 'dataMax',
+        },
+      ],
+      yAxis: [
+        {
+          scale: true,
+          splitNumber: 5,
+          axisLine: {
+            show: false,
+          },
+          axisLabel: {
+            color: '#8da3c7',
+            formatter: (value: number) =>
+              `$${Math.round(value).toLocaleString()}`,
+          },
+          splitLine: {
+            lineStyle: {
+              color: 'rgba(255,255,255,0.06)',
+            },
           },
         },
-        axisLabel: {
-          color: '#8da3c7',
-          fontSize: 12,
-        },
-      },
-      yAxis: {
-        type: 'value',
-        scale: true,
-        axisLine: {
-          show: false,
-        },
-        splitLine: {
-          lineStyle: {
-            color: 'rgba(255,255,255,0.06)',
+        {
+          gridIndex: 1,
+          splitNumber: 2,
+          axisLine: {
+            show: false,
+          },
+          axisLabel: {
+            color: '#8da3c7',
+            fontSize: 10,
+          },
+          splitLine: {
+            show: false,
           },
         },
-        axisLabel: {
-          color: '#8da3c7',
-          formatter: (value: number) =>
-            `$${Math.round(value).toLocaleString()}`,
-        },
-      },
+      ],
       series: [
         {
-          name: 'BTC',
-          type: 'line',
-          smooth: true,
-          symbol: 'none',
-          data: data.map((item) => item.price),
-          lineStyle: {
-            width: 3,
-            color: '#4fa3ff',
+          name: 'Price',
+          type: 'candlestick',
+          data: candlestickData,
+          itemStyle: {
+            color: '#37e27d',
+            color0: '#ff5d6c',
+            borderColor: '#37e27d',
+            borderColor0: '#ff5d6c',
           },
-          areaStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [
-                { offset: 0, color: 'rgba(79, 163, 255, 0.35)' },
-                { offset: 1, color: 'rgba(79, 163, 255, 0.02)' },
-              ],
+          emphasis: {
+            itemStyle: {
+              borderWidth: 1,
             },
+          },
+        },
+        {
+          name: 'Volume',
+          type: 'bar',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          data: volumeData,
+          barMaxWidth: 10,
+          itemStyle: {
+            color: 'rgba(79, 163, 255, 0.65)',
           },
         },
       ],
     };
-  }, [data]);
+  }, [candles]);
+
+  if (streamStatus === 'error') {
+    return (
+      <WidgetState
+        title="Chart unavailable due to stream error"
+        variant="error"
+      />
+    );
+  }
+
+  if (
+    (streamStatus === 'connecting' || streamStatus === 'reconnecting') &&
+    data.length === 0
+  ) {
+    return <WidgetState title="Waiting for market data..." variant="warning" />;
+  }
+
+  if (data.length === 0) {
+    return <WidgetState title="No chart data yet" />;
+  }
 
   return (
     <ReactECharts
       option={option}
       notMerge
       lazyUpdate
-      style={{ width: '100%', height: '320px' }}
+      style={{ width: '100%', height: '360px' }}
     />
   );
 }

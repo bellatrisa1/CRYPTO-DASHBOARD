@@ -1,3 +1,5 @@
+// src/components/chart/MiniChart.tsx
+
 import ReactECharts from 'echarts-for-react';
 import type { PricePoint } from '../../types/market';
 

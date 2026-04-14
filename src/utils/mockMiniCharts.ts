@@ -1,3 +1,5 @@
+// src/utils/mockMiniCharts.ts
+
 import type { PricePoint } from '../types/market';
 
 function random(min: number, max: number) {
