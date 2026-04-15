@@ -34,6 +34,7 @@ function App() {
   useWebSocketStream({
     enabled: realtimeSource !== 'mock' && Boolean(realtimeUrl),
     url: realtimeUrl ?? '',
+    symbol,
   });
 
   useMockMarketStream({
