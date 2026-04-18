@@ -1,7 +1,9 @@
+export type SharedMetricUnit = '%' | 'MB/s' | 'req/s';
+
 export type SharedMetric = {
   label: string;
   value: number;
-  unit: '%';
+  unit: SharedMetricUnit;
 };
 
 export type SharedRegionActivity = {
