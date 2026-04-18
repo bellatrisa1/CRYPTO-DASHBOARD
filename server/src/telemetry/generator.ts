@@ -1,20 +1,6 @@
-type Metric = {
-  label: string;
-  value: number;
-  unit: '%';
-};
+import type { SharedTelemetrySnapshot } from '../../../shared/telemetry.ts';
 
-type RegionActivity = {
-  region: string;
-  value: number;
-};
-
-type Telemetry = {
-  metrics: Metric[];
-  activity: RegionActivity[];
-};
-
-export function generateTelemetry(): Telemetry {
+export function generateTelemetry(): SharedTelemetrySnapshot {
   return {
     metrics: [
       {

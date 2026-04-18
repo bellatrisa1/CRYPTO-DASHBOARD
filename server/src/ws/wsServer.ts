@@ -1,16 +1,10 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { connectToBinance } from './wsClient.js';
 import { generateTelemetry } from '../telemetry/generator.js';
-
-type ClientMessage =
-  | {
-      type: 'ping';
-      timestamp: number;
-    }
-  | {
-      type: 'subscribe';
-      symbol: string;
-    };
+import type {
+  SharedClientToServerEvent,
+  SharedServerToClientEvent,
+} from '../../../shared/types/ws.js';
 
 const DEFAULT_SYMBOL = 'BTCUSDT';
 
@@ -28,15 +22,15 @@ export function startWsServer(port: number): void {
     const telemetryInterval = setInterval(() => {
       if (client.readyState !== WebSocket.OPEN) return;
 
-      client.send(
-        JSON.stringify({
-          type: 'telemetry.snapshot',
-          payload: generateTelemetry(),
-        }),
-      );
+      const event: SharedServerToClientEvent = {
+        type: 'telemetry.snapshot',
+        payload: generateTelemetry(),
+      };
+
+      client.send(JSON.stringify(event));
     }, 2000);
 
-    function forwardToClient(data: unknown) {
+    function forwardToClient(data: SharedServerToClientEvent) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(data));
       }
@@ -61,19 +55,19 @@ export function startWsServer(port: number): void {
 
     client.on('message', (raw) => {
       try {
-        const message = JSON.parse(raw.toString()) as Partial<ClientMessage>;
+        const message = JSON.parse(raw.toString()) as SharedClientToServerEvent;
 
-        if (message.type === 'ping' && typeof message.timestamp === 'number') {
-          client.send(
-            JSON.stringify({
-              type: 'pong',
-              timestamp: message.timestamp,
-            }),
-          );
+        if (message.type === 'ping') {
+          const response: SharedServerToClientEvent = {
+            type: 'pong',
+            timestamp: message.timestamp,
+          };
+
+          client.send(JSON.stringify(response));
           return;
         }
 
-        if (message.type === 'subscribe' && typeof message.symbol === 'string') {
+        if (message.type === 'subscribe') {
           replaceBinanceConnection(message.symbol);
         }
       } catch (error) {

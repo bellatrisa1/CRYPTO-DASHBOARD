@@ -1,20 +1,9 @@
-import type { PricePoint } from './market';
+import type {
+  SharedMetric,
+  SharedRegionActivity,
+  SharedTelemetrySnapshot,
+} from '../../shared/telemetry';
 
-export type SystemMetric = {
-  label: string;
-  value: number;
-  unit: '%' | 'MB/s' | 'req/s';
-};
-
-export type RegionActivity = {
-  region: string;
-  value: number;
-};
-
-export type TelemetryState = {
-  volumeSeries: PricePoint[];
-  serverLoadSeries: PricePoint[];
-  networkSeries: PricePoint[];
-  metrics: SystemMetric[];
-  activity: RegionActivity[];
-};
+export type SystemMetric = SharedMetric;
+export type RegionActivity = SharedRegionActivity;
+export type TelemetryState = SharedTelemetrySnapshot;

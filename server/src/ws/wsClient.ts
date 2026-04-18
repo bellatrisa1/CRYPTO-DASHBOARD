@@ -1,6 +1,7 @@
 import WebSocket, { RawData } from 'ws';
 import { mapBinanceTradeToFrontend } from '../mappers/binance.mapper.js';
 import { mapBinanceDepthToOrderBook } from '../mappers/orderbook.mapper.js';
+import type { SharedServerToClientEvent } from '../../../shared/types/ws.js';
 
 type BinanceTradeMessage = {
   e: 'trade';
@@ -21,16 +22,6 @@ type BinanceDepthMessage = {
   asks: [string, string][];
 };
 
-type FrontendEvent =
-  | {
-      type: 'trade';
-      payload: ReturnType<typeof mapBinanceTradeToFrontend>;
-    }
-  | {
-      type: 'order_book';
-      payload: ReturnType<typeof mapBinanceDepthToOrderBook>;
-    };
-
 type BinanceStreamController = {
   close: () => void;
   getReadyState: () => number | null;
@@ -38,13 +29,12 @@ type BinanceStreamController = {
 
 function buildBinanceStreamUrl(symbol: string): string {
   const normalized = symbol.toLowerCase();
-
   return `wss://stream.binance.com:9443/stream?streams=${normalized}@trade/${normalized}@depth20@100ms`;
 }
 
 export function connectToBinance(
   symbol: string,
-  onMessage: (data: FrontendEvent) => void,
+  onMessage: (data: SharedServerToClientEvent) => void,
 ): BinanceStreamController {
   let ws: WebSocket | null = null;
   let reconnectTimer: NodeJS.Timeout | null = null;
@@ -99,10 +89,7 @@ export function connectToBinance(
 
     ws.on('message', (msg: RawData) => {
       try {
-        const parsed = JSON.parse(msg.toString()) as {
-          data?: unknown;
-        };
-
+        const parsed = JSON.parse(msg.toString()) as { data?: unknown };
         const data = parsed.data;
 
         if (!data || typeof data !== 'object') return;

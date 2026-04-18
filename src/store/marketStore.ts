@@ -73,7 +73,7 @@ const initialSymbol: TradingPair = 'BTCUSDT';
 const initialBasePrice = getBasePriceBySymbol(initialSymbol);
 const initialPoints = generateMockPriceSeries(
   CHART_POINTS_LIMIT,
-  initialBasePrice
+  initialBasePrice,
 );
 const firstPrice = initialPoints[0]?.price ?? 0;
 const lastPrice = initialPoints[initialPoints.length - 1]?.price ?? 0;
@@ -107,7 +107,7 @@ function createMiniPoint(base: number, volatility = 0.1): PricePoint {
   return {
     timestamp: Date.now(),
     price: Number(
-      (base + (Math.random() - 0.5) * base * volatility).toFixed(2)
+      (base + (Math.random() - 0.5) * base * volatility).toFixed(2),
     ),
     volume: 0,
   };
@@ -116,12 +116,12 @@ function createMiniPoint(base: number, volatility = 0.1): PricePoint {
 function createInitialMiniSeries(
   points: number,
   base: number,
-  volatility = 0.1
+  volatility = 0.1,
 ): PricePoint[] {
   return Array.from({ length: points }).map((_, index) => ({
     timestamp: Date.now() - (points - index) * 1000,
     price: Number(
-      (base + (Math.random() - 0.5) * base * volatility).toFixed(2)
+      (base + (Math.random() - 0.5) * base * volatility).toFixed(2),
     ),
     volume: 0,
   }));
@@ -148,7 +148,11 @@ function createInitialActivity(): RegionActivity[] {
 function createInitialTelemetry() {
   return {
     volumeSeries: createInitialMiniSeries(TELEMETRY_SERIES_LIMIT, 2000, 0.15),
-    serverLoadSeries: createInitialMiniSeries(TELEMETRY_SERIES_LIMIT, 60, 0.08),
+    serverLoadSeries: createInitialMiniSeries(
+      TELEMETRY_SERIES_LIMIT,
+      60,
+      0.08,
+    ),
     networkSeries: createInitialMiniSeries(TELEMETRY_SERIES_LIMIT, 120, 0.12),
     metrics: createInitialMetrics(),
     activity: createInitialActivity(),
@@ -198,7 +202,7 @@ export const useMarketStore = create<MarketState>((set) => ({
       const nextLastPrice =
         nextPoints[nextPoints.length - 1]?.price ?? point.price;
       const nextChangePercent = Number(
-        (((nextLastPrice - nextFirstPrice) / nextFirstPrice) * 100).toFixed(2)
+        (((nextLastPrice - nextFirstPrice) / nextFirstPrice) * 100).toFixed(2),
       );
 
       return {
@@ -242,36 +246,15 @@ export const useMarketStore = create<MarketState>((set) => ({
       nextReconnectInMs: null,
     }),
 
+  /* ВАЖНО: НЕ ЧИСТИМ ЭКРАН ПРИ СМЕНЕ ПАРЫ */
   setSymbol: (symbol) =>
-    set(() => {
-      const basePrice = getBasePriceBySymbol(symbol);
-      const nextPoints = generateMockPriceSeries(CHART_POINTS_LIMIT, basePrice);
-      const nextFirstPrice = nextPoints[0]?.price ?? basePrice;
-      const nextLastPrice =
-        nextPoints[nextPoints.length - 1]?.price ?? basePrice;
-
-      return {
-        symbol,
-        points: nextPoints,
-        trades: createInitialTrades(symbol, nextLastPrice),
-        orderBook: generateMockOrderBook(nextLastPrice),
-        lastPrice: nextLastPrice,
-        changePercent: nextFirstPrice
-          ? Number(
-              (
-                ((nextLastPrice - nextFirstPrice) / nextFirstPrice) *
-                100
-              ).toFixed(2)
-            )
-          : 0,
-        volume24h: DEFAULT_VOLUME_24H,
-        streamStatus: 'connecting',
-        isConnected: false,
-        reconnectAttempt: 0,
-        nextReconnectInMs: null,
-        latencyMs: null,
-        telemetry: createInitialTelemetry(),
-      };
+    set({
+      symbol,
+      streamStatus: 'connecting',
+      isConnected: false,
+      reconnectAttempt: 0,
+      nextReconnectInMs: null,
+      latencyMs: null,
     }),
 
   setLatency: (value) =>
@@ -296,9 +279,7 @@ export const useMarketStore = create<MarketState>((set) => ({
         ],
         metrics: state.telemetry.metrics.map((metric) => ({
           ...metric,
-          value: Number(
-            updateMetricValue(metric.label, metric.value).toFixed(0)
-          ),
+          value: Number(updateMetricValue(metric.label, metric.value).toFixed(0)),
         })),
         activity: state.telemetry.activity.map((item) => ({
           ...item,
@@ -330,10 +311,9 @@ export const useMarketStore = create<MarketState>((set) => ({
         lastPrice: lastPointPrice,
         changePercent: firstPointPrice
           ? Number(
-              (
-                ((lastPointPrice - firstPointPrice) / firstPointPrice) *
-                100
-              ).toFixed(2)
+              (((lastPointPrice - firstPointPrice) / firstPointPrice) * 100).toFixed(
+                2,
+              ),
             )
           : 0,
         volume24h: snapshot.volume24h,

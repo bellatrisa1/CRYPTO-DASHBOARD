@@ -8,9 +8,8 @@ import { PairSelector } from './components/ui/PairSelector';
 import { RegionalActivity } from './components/ui/RegionalActivity';
 import { Widget } from './components/ui/Widget';
 import { useMarketSnapshot } from './hooks/useMarketSnapshot';
-import { useMockMarketStream } from './hooks/useMockMarketStream';
 import { useWebSocketStream } from './hooks/useWebSocketStream';
-import { buildRealtimeUrl, getRealtimeSource } from './services/streams';
+import { buildRealtimeUrl } from './services/streams';
 import { useMarketStore } from './store/marketStore';
 
 function App() {
@@ -23,8 +22,7 @@ function App() {
   const telemetry = useMarketStore((state) => state.telemetry);
   const latencyMs = useMarketStore((state) => state.latencyMs);
 
-  const realtimeSource = getRealtimeSource();
-  const realtimeUrl = buildRealtimeUrl(symbol);
+  const realtimeUrl = buildRealtimeUrl();
 
   useMarketSnapshot({
     symbol,
@@ -32,13 +30,9 @@ function App() {
   });
 
   useWebSocketStream({
-    enabled: realtimeSource !== 'mock' && Boolean(realtimeUrl),
+    enabled: Boolean(realtimeUrl),
     url: realtimeUrl ?? '',
     symbol,
-  });
-
-  useMockMarketStream({
-    enabled: realtimeSource === 'mock',
   });
 
   return (

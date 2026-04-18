@@ -1,9 +1,3 @@
-/* src/App.scss */
-
-/* =========================
-   TOKENS / BASE
-========================= */
-
 :root {
   color-scheme: dark;
   --bg: #07111f;
@@ -87,8 +81,9 @@ body {
     grid-column: 10 / 13;
   }
 
+  /* РАСТЯНУЛА ШИРЕ, ЧТОБЫ НЕ БЫЛО БОЛЬШОЙ ПУСТОТЫ */
   &__order-book {
-    grid-column: 1 / 7;
+    grid-column: 1 / 13;
   }
 
   &__volume {
@@ -171,6 +166,12 @@ body {
     background: rgba(243, 188, 88, 0.08);
     color: var(--yellow);
   }
+
+  &--latency {
+    border-color: rgba(79, 163, 255, 0.28);
+    background: rgba(79, 163, 255, 0.08);
+    color: var(--blue);
+  }
 }
 
 .status-dot {
@@ -220,7 +221,7 @@ body {
 .market-overview {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .market-card,
@@ -232,27 +233,35 @@ body {
     rgba(18, 33, 56, 0.92),
     rgba(8, 17, 29, 0.98)
   );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 10px 30px rgba(0, 0, 0, 0.22);
 }
 
 .market-card {
-  padding: 18px;
+  padding: 14px;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
-  &__top,
-  &__bottom {
+  &__top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
   }
 
-  &__top {
-    margin-bottom: 18px;
+  &__middle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
 
   &__label {
     color: var(--text-soft);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.03em;
   }
@@ -260,19 +269,30 @@ body {
   &__change {
     font-size: 14px;
     font-weight: 700;
+    white-space: nowrap;
   }
 
   &__value {
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
+    font-weight: 800;
   }
 
-  &__trend {
+  &__chart {
+    margin-top: auto;
+
+    > div {
+      height: 56px !important;
+    }
+  }
+
+  &__arrow {
     display: inline-block;
     width: 0;
     height: 0;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
+    flex-shrink: 0;
 
     &--up {
       border-bottom: 16px solid var(--green);
@@ -280,6 +300,40 @@ body {
 
     &--down {
       border-top: 16px solid var(--red);
+    }
+  }
+
+  &--gauge {
+    justify-content: space-between;
+  }
+
+  &__gauge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  &__gauge-ring {
+    width: 94px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at center, #0d1727 54%, transparent 56%),
+      conic-gradient(
+        var(--green) 0 28%,
+        var(--yellow) 28% 68%,
+        var(--red) 68% 100%
+      );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    span {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
     }
   }
 }
@@ -312,6 +366,10 @@ body {
     height: calc(100% - 48px);
     min-height: 0;
   }
+}
+
+.dashboard-grid__main-chart .widget {
+  min-height: 420px;
 }
 
 /* =========================
@@ -393,6 +451,26 @@ body {
       background: rgba(255, 255, 255, 0.06);
     }
   }
+}
+
+.trades__controls select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(11, 23, 40, 0.72);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+}
+
+.trades__controls select:focus {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 2px rgba(79, 163, 255, 0.12);
+}
+
+.trades__controls option {
+  background: #0b1728;
+  color: var(--text);
 }
 
 .trades-placeholder {
@@ -850,147 +928,4 @@ body {
   .order-book__grid {
     grid-template-columns: 1fr;
   }
-}
-.dashboard-grid__main-chart .widget {
-  min-height: 420px;
-}
-
-.market-overview {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.market-card,
-.widget {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: linear-gradient(
-    180deg,
-    rgba(18, 33, 56, 0.92),
-    rgba(8, 17, 29, 0.98)
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    0 10px 30px rgba(0, 0, 0, 0.22);
-}
-
-.market-card {
-  padding: 14px;
-  min-height: 132px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  &__top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  &__middle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  &__label {
-    color: var(--text-soft);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
-
-  &__change {
-    font-size: 14px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  &__value {
-    font-size: 22px;
-    line-height: 1;
-    font-weight: 800;
-  }
-
-  &__chart {
-    margin-top: auto;
-
-    > div {
-      height: 56px !important;
-    }
-  }
-
-  &__arrow {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    flex-shrink: 0;
-
-    &--up {
-      border-bottom: 16px solid var(--green);
-    }
-
-    &--down {
-      border-top: 16px solid var(--red);
-    }
-  }
-
-  &--gauge {
-    justify-content: space-between;
-  }
-
-  &__gauge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-  }
-
-  &__gauge-ring {
-    width: 94px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(circle at center, #0d1727 54%, transparent 56%),
-      conic-gradient(
-        var(--green) 0 28%,
-        var(--yellow) 28% 68%,
-        var(--red) 68% 100%
-      );
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    span {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text);
-    }
-  }
-}
-
-.trades__controls select {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: rgba(11, 23, 40, 0.72);
-  color: var(--text);
-  cursor: pointer;
-  outline: none;
-}
-
-.trades__controls select:focus {
-  border-color: var(--border-strong);
-  box-shadow: 0 0 0 2px rgba(79, 163, 255, 0.12);
-}
-
-.trades__controls option {
-  background: #0b1728;
-  color: var(--text);
 }
