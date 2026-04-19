@@ -41,7 +41,7 @@ function App() {
         <header className="dashboard-header">
           <div>
             <p className="dashboard-header__eyebrow">Real-time monitoring</p>
-            <h1 className="dashboard-header__title">PulseGrid Dashboard</h1>
+            <h1 className="dashboard-header__title">CRYPTO-DASHBOARD</h1>
           </div>
 
           <div className="dashboard-header__controls">

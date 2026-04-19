@@ -1,73 +1,142 @@
-# React + TypeScript + Vite
+# 📊 CRYPTO-DASHBOARD — Real-Time Market Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Проект представляет собой real-time дашборд для мониторинга рыночных данных.  
+Основная цель — отработка работы с потоковыми данными, WebSocket и производительной отрисовкой UI.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+🔗 Demo: https://your-project.vercel.app
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 1. ✨ Основные возможности:
 
-## Expanding the ESLint configuration
+### 📡 Работа с realtime данными
+- подключение к WebSocket
+- получение данных в реальном времени
+- обновление интерфейса без перезагрузки
+- fallback на mock-данные при необходимости
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📈 График цены
+- отображение изменения цены
+- обновление в реальном времени
+- обработка потока данных без лагов
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 📊 Стакан (Order Book)
+- отображение bid / ask уровней
+- визуализация глубины рынка
+- обновление данных в реальном времени
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🔄 Лента сделок (Trades)
+- поток последних сделок
+- разделение на buy / sell
+- фильтрация
+- ограничение количества записей
+
+### 🖥 Системные метрики
+- CPU / Memory / Network
+- динамическое обновление
+- визуализация через мини-графики
+
+### 🌍 Активность пользователей
+- распределение по регионам
+- обновление значений в реальном времени
+
+---
+
+## 2. 🎨 Интерфейс:
+
+Интерфейс реализован в виде аналитического дашборда.
+
+Особенности:
+- grid layout
+- виджеты
+- графики
+- таблицы
+- адаптивная верстка
+
+Поддерживаемые устройства:
+
+- Desktop  
+- Laptop  
+- Tablet  
+- Mobile  
+
+---
+
+## 3. 🧰 Используемые технологии:
+
+### Frontend
+- **React**
+- **TypeScript**
+- **Vite**
+- **Zustand**
+- **ECharts**
+- **SCSS**
+
+### Backend
+- **Node.js**
+- **WebSocket (ws)**
+
+### Data
+- **Binance API**
+- **Mock data генерация**
+
+---
+
+## 4. ⚙️ Режимы работы:
+
+- **mock** — генерация данных
+- **local** — локальный WebSocket сервер
+- **binance** — реальные данные Binance
+
+---
+
+## 5. 🎯 Что отрабатывалось в проекте:
+
+- работа с WebSocket
+- обработка потоковых данных
+- управление состоянием в real-time
+- оптимизация рендера
+- разделение frontend / backend / shared
+
+---
+
+## 6. 🚧 В планах:
+
+- авторизация
+- мульти-пары
+- улучшенный reconnect
+- кеширование (Redis)
+- хранение истории
+- улучшение графиков
+
+---
+
+## 7. 🚀 Установка и запуск:
+
+1. Клонировать репозиторий:
+
+```
+git clone https://github.com/bellatrisa1/CRYPTO-DASHBOARD.git
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Установить зависимости
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```
+npm install
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+3. Запустить проект локально
+
+```
+npm run dev
+```
+
+4. Сборка версии:
+
+```
+npm run build
 ```
