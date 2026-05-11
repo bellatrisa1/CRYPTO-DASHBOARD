@@ -5,7 +5,7 @@
 
 ---
 
-🔗 Demo: https://your-project.vercel.app
+### 🔗 Demo: https://crypto-dashboard-lime-theta.vercel.app/
 
 ---
 
